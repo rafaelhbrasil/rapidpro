@@ -20,6 +20,7 @@ from temba.utils.mage import handle_new_message, handle_new_contact
 from temba.utils.queues import start_task, complete_task, nonoverlapping_task
 from .models import Msg, Broadcast, BroadcastRecipient, ExportMessagesTask, PENDING, HANDLE_EVENT_TASK, MSG_EVENT
 from .models import FIRE_EVENT, TIMEOUT_EVENT, LabelCount, SystemLabelCount
+import unidecode
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +81,8 @@ def process_message(msg, new_message=False, new_contact=False):
     """
     Processes the passed in message dealing with new contacts or mage messages appropriately.
     """
-    print("M[%09d] Processing - %s" % (msg.id, msg.text))
+    #msg.text = msg.text.decode('utf-8')
+    print("M[%d] Processing - %s" % (msg.id, unidecode.unidecode(msg.text)))
     start = time.time()
 
     # if message was created in Mage...
@@ -90,7 +92,7 @@ def process_message(msg, new_message=False, new_contact=False):
             handle_new_contact(msg.org, msg.contact)
 
     Msg.process_message(msg)
-    print("M[%09d] %08.3f s - %s" % (msg.id, time.time() - start, msg.text))
+    print("M[%d] %08.3f s - %s" % (msg.id, time.time() - start, unidecode.unidecode(msg.text)))
 
 
 @task(track_started=True, name='process_message_task')
